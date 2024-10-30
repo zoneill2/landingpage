@@ -67,12 +67,14 @@ class Effect{
 }
 
 class Block {
-    constructor(x, y, endX, endY, ctx){
+    constructor(x, y, endx, endy, ctx){
         this.x = x;
         this.y = y;
+        this.endx = endx;
+        this.endy = endy;
         this.ctx = ctx;
-        this.deltax = endX - x;
-        this.deltay = endY - y;
+        this.deltax = endx - x;
+        this.deltay = endy - y;
         this.vx = 0;
         this.vy = 0; 
         this.mass = 1;
@@ -81,7 +83,7 @@ class Block {
         let randomColor = Math.floor(Math.random() * 1);
         switch(randomColor){
             case 0:
-            this.color = `rgba(0, 0, 169, ${Math.random() * 0.5 + 0.2})`;
+            this.color = `rgba(90, 90, 90, ${Math.random() * 0.5 + 0.2})`;
             break;
             case 1:
             this.color = `rgba(169, 169, 0, ${Math.random() * 0.5 + 0.2})`;
@@ -96,18 +98,23 @@ class Block {
     }
 
     move(){
-        let distanceX = mouse.x - this.x;
-        let distanceY = mouse.y - this.y;
-        let distance = Math.sqrt((distanceX * distanceX) + (distanceY * distanceY));
-
-        const forcex = (this.deltax/distance) * .02;
-        const forcey = (this.deltay/distance) * .02;
+        //constant force
+        this.deltax = this.endx - this.x;
+        this.deltay = this.endy - this.y;
+        let distanceToCenter = Math.sqrt((this.deltax* this.deltax) + (this.deltay * this.deltay));
+        const forcex = (this.deltax/distanceToCenter) * .05;
+        const forcey = (this.deltay/distanceToCenter) * .05;
 
         this.vx += forcex / this.mass;
         this.vy += forcey / this.mass;
 
+        //force exerted by mouse
+        let distanceX = mouse.x - this.x;
+        let distanceY = mouse.y - this.y;
+        let distance = Math.sqrt((distanceX * distanceX) + (distanceY * distanceY));
+
         if(distance < mouse.r){
-            let force = (-mouse.r / distance) * 2;
+            let force = (-mouse.r / distance) * .5;
             let angle = Math.atan2(distanceY, distanceX);
             this.vx += force * Math.cos(angle);
             this.vy += force * Math.sin(angle);
@@ -139,7 +146,7 @@ Number.prototype.between = function(a, b, inclusive) {
 
 const effect = new Effect(canvas.width, canvas.height, ctx);
 const mouse = {
-    r: 50,
+    r: 30,
     x: canvas.width/2,
     y: canvas.height/2,
   };

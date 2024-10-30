@@ -1,0 +1,6 @@
+Ideas:
+-Random Shapes
+-Code snippets
+-Rotation based on velocity
+
+-add on mouse hold you collect all the particles
