@@ -1,7 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+body{
+    overflow: hidden;
+    background-color: rgb(80,80,80, .8);
+}
 
-.background {
-    background-color: rgb(133,133,133, .8);
+#shortDesc{
+    display: inline;
+    font-size: large;
+    position: relative;
+}
+
+#canvas {
+    position: fixed;
+    z-index: 0;
+}
+
+.card{
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    z-index: 1;
+}
+
+.card:hover{
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0,0,0,.2);
 }

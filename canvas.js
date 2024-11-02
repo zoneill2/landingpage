@@ -70,21 +70,21 @@ class Block {
     constructor(x, y, endx, endy, ctx){
         this.x = x; 
         this.y = y;
-        this.endx = endx;
-        this.endy = endy;
-        this.ctx = ctx;
-        this.deltax = endx - x;
-        this.deltay = endy - y;
         this.vx = 0;
-        this.vy = 0; 
-        this.mass = 1;
-        this.time = 0;
+        this.vy = 0;
+        this.ctx = ctx;
+        this.time = 360;
+        this.step = 1/this.time;
+        this.elapsed = 0;
         this.out = false;
-        this.speed = .2;
+        this.deltax = endx - this.x;
+        this.deltay = endy - this.y;
+        this.ax = (2 * this.deltax) / (this.time * this.time);
+        this.ay = (2 * this.deltay) / (this.time * this.time);
         let randomColor = Math.floor(Math.random() * 1);
         switch(randomColor){
             case 0:
-            this.color = `rgba(90, 90, 90, ${Math.random() * 0.5 + 0.2})`;
+            this.color = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`;
             break;
             case 1:
             this.color = `rgba(169, 169, 0, ${Math.random() * 0.5 + 0.2})`;
@@ -95,37 +95,33 @@ class Block {
             
         } 
         this.size = Math.floor(Math.random() * 20) + 10;
-        this.draw();
+        this.move();
     }
 
     move(){
-        this.time++;
+        this.vx += this.ax * this.elapsed;
+        this.vy += this.ay * this.elapsed;
 
-        //constant force
-        this.deltax = this.endx - this.x;
-        this.deltay = this.endy - this.y;
-        let distanceToCenter = Math.sqrt((this.deltax* this.deltax) + (this.deltay * this.deltay));
-        const forcex = (this.deltax/distanceToCenter) * .05;
-        const forcey = (this.deltay/distanceToCenter) * .05;
 
-        this.vx += (forcex / this.mass) * (this.time/120);
-        this.vy += (forcey / this.mass) * (this.time/120);
+        const mouseDeltaX = mouse.x - this.x;
+        const mouseDeltaY = mouse.y - this.y;
+        const mouseDelta = Math.sqrt((mouseDeltaX * mouseDeltaX) + (mouseDeltaY * mouseDeltaY));
 
-        //force exerted by mouse
-        let distanceX = mouse.x - this.x;
-        let distanceY = mouse.y - this.y;
-        let distance = Math.sqrt((distanceX * distanceX) + (distanceY * distanceY));
-
-        if(distance < mouse.r){
-            let force = (-mouse.r / distance) * .5;
-            let angle = Math.atan2(distanceY, distanceX);
-            this.vx += (force/this.mass) * Math.cos(angle);
-            this.vy += (force/this.mass) * Math.sin(angle);
+        if(mouseDelta < mouse.r){
+            let thetaVel = Math.atan2(this.vy, this.vx);
+            let thetaD = Math.atan2(mouseDeltaY, mouseDeltaX);
+            let thetaReflect = 2 * thetaD - thetaVel;
+            let speed = Math.sqrt((this.vx * this.vx) + (this.vy * this.vy))
+            this.vx = Math.cos(thetaReflect) * speed;
+            this.vy = Math.sin(thetaReflect) * speed;
         }
-        this.x += this.vx * .2;
-        this.y += this.vy * .2; 
 
-        if(this.time/120 > 12)
+        this.x += this.vx;
+        this.y += this.vy;
+
+        this.elapsed += this.step;
+
+        if(this.elapsed > this.time)
             this.out = true;
 
         if(((this.x + this.size).between((center.x - center.r), (center.x + center.r), true)) && ((this.y + this.size).between((center.y - center.r), (center.y + center.r), true)))
@@ -136,8 +132,11 @@ class Block {
 
     draw() {
         ctx.save();
+        ctx.lineWidth = 2;
         ctx.fillStyle = this.color;
+        ctx.strokeStyle = `rgb(80, 80, 80)`;
         ctx.fillRect(this.x, this.y, this.size, this.size);
+        ctx.strokeRect(this.x, this.y, this.size, this.size);
         ctx.restore();
         }
     
@@ -173,8 +172,8 @@ window.addEventListener('mousemove', (event) => {
 
 setInterval(() => {
     if(!document.hidden)
-        effect.add(4);
-}, 100);
+        effect.add(5);
+}, 500);
 
 document.addEventListener("visibilitychange", function() {
     console.log(document.hidden, document.visibilityState);
