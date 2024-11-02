@@ -68,7 +68,7 @@ class Effect{
 
 class Block {
     constructor(x, y, endx, endy, ctx){
-        this.x = x;
+        this.x = x; 
         this.y = y;
         this.endx = endx;
         this.endy = endy;
@@ -78,6 +78,7 @@ class Block {
         this.vx = 0;
         this.vy = 0; 
         this.mass = 1;
+        this.time = 0;
         this.out = false;
         this.speed = .2;
         let randomColor = Math.floor(Math.random() * 1);
@@ -98,6 +99,8 @@ class Block {
     }
 
     move(){
+        this.time++;
+
         //constant force
         this.deltax = this.endx - this.x;
         this.deltay = this.endy - this.y;
@@ -105,8 +108,8 @@ class Block {
         const forcex = (this.deltax/distanceToCenter) * .05;
         const forcey = (this.deltay/distanceToCenter) * .05;
 
-        this.vx += forcex / this.mass;
-        this.vy += forcey / this.mass;
+        this.vx += (forcex / this.mass) * (this.time/120);
+        this.vy += (forcey / this.mass) * (this.time/120);
 
         //force exerted by mouse
         let distanceX = mouse.x - this.x;
@@ -116,11 +119,14 @@ class Block {
         if(distance < mouse.r){
             let force = (-mouse.r / distance) * .5;
             let angle = Math.atan2(distanceY, distanceX);
-            this.vx += force * Math.cos(angle);
-            this.vy += force * Math.sin(angle);
+            this.vx += (force/this.mass) * Math.cos(angle);
+            this.vy += (force/this.mass) * Math.sin(angle);
         }
         this.x += this.vx * .2;
         this.y += this.vy * .2; 
+
+        if(this.time/120 > 12)
+            this.out = true;
 
         if(((this.x + this.size).between((center.x - center.r), (center.x + center.r), true)) && ((this.y + this.size).between((center.y - center.r), (center.y + center.r), true)))
             this.out = true;
